@@ -35,6 +35,7 @@ INCLUDES = -I$(top_srcdir) -I$(top_srcdir)/include -I$(top_srcdir)/src \
 
 aide_SOURCES =	aide.c		\
 		base64.c	\
+		base64v2.c	\
 		be.c		\
 		commandconf.c	\
 		compare_db.c	\
