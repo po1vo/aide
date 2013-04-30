@@ -523,7 +523,7 @@ unsigned char* base64tobyte(char* src,int len,size_t *ret_len)
     return NULL;
 
   if(strcmp(src,"0") != 0)
-    return base64_decode(src, len, ret_len);
+     return base64_decode(src, len, ret_len);
 
   return NULL;
 }
