@@ -276,14 +276,6 @@ db_line* db_readline(int db){
   
 }
 
-byte* base64tobyte(char* src,int len,size_t *ret_len)
-{
-  if(strcmp(src,"0")!=0){
-    return decode_base64(src,len,ret_len);
-  }
-  return NULL;
-}
-
 static char *db_readchar(char *s)
 {
   if (s == NULL)

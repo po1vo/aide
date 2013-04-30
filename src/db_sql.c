@@ -45,7 +45,6 @@
 #endif
 
 char* db_get_sql(db_line*,db_config*);
-byte* base64tobyte(char* src,int len,size_t *ret_len);
 
 int _db_check_result(PGconn *conn, PGresult *res, char *query) 
 {
@@ -229,17 +228,14 @@ void db_readline_sql_byte(void** d, int db, int i, db_config* dbconf) {
   
   if (*d!=NULL)
     *((byte*)d) = base64tobyte(*d, strlen(*d), NULL);
- 
 }
 
 void db_readline_sql_time(void** d,int db,int i, db_config* dbconf) {
   
   db_readline_sql_char(d,db,i, dbconf);
   
-  if (*d!=NULL) {
-    *((time_t*)d)=base64totime_t(*d);
-  }
-  
+  if (*d!=NULL)
+    *((time_t*)d) = base64totime_t(*d);
 }
 
 db_line* db_readline_sql(int db, db_config* dbconf) {

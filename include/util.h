@@ -64,4 +64,5 @@ size_t strnlen(const char *s, size_t maxlen);
 
 int syslog_facility_lookup(char *);
 
+unsigned char* base64tobyte(char* src,int len,size_t *ret_len);
 #endif

@@ -39,6 +39,7 @@
 #include "report.h"
 #include "db_config.h"
 #include "util.h"
+#include "base64v2.h"
 
 #define URL_UNSAFE " <>\"#%{}|\\^~[]`@:\033'"
 #define ISPRINT(c) (isascii(c) && isprint(c))
@@ -513,6 +514,17 @@ void* dlclose(void*handle)
 
 const char* dlerror(void)
 {
+  return NULL;
+}
+
+unsigned char* base64tobyte(char* src,int len,size_t *ret_len)
+{
+  if(len == 0)
+    return NULL;
+
+  if(strcmp(src,"0") != 0)
+    return base64_decode(src, len, ret_len);
+
   return NULL;
 }
 
