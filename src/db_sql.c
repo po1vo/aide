@@ -246,24 +246,15 @@ db_line* db_readline_sql(int db, db_config* dbconf) {
   
   db_line* rline;
   int i;
-//  url_t* db_url=NULL;
   FILE** db_filep=NULL;
-//  int* db_osize=0;
-//  DB_FIELD** db_order=NULL;
 
   switch (db) {
   case DB_OLD: {
-//    db_url=dbconf->db_in_url;
     db_filep=&(dbconf->db_in);
-//    db_osize=&(dbconf->db_in_size);
-//    db_order=&(dbconf->db_in_order);
     break;
   }
   case DB_NEW: {
-//    db_url=dbconf->db_new_url;
     db_filep=&(dbconf->db_new);
-//    db_osize=&(dbconf->db_new_size);
-//    db_order=&(dbconf->db_new_order);
     break;
   }
   }
@@ -308,7 +299,6 @@ db_line* db_readline_sql(int db, db_config* dbconf) {
   ((psql_data*)(*db_filep))->curread++;
   
   error(255,"D: db%i: filename %s\n",db,rline->filename);
-  //error(255,"D: db%i md5 %s\n",db,rline->md5);
   
   return rline;
 }
