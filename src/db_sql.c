@@ -227,8 +227,8 @@ void db_readline_sql_byte(void** d, int db, int i, db_config* dbconf) {
   
   db_readline_sql_char(d, db, i, dbconf);
   
-//  if (*d!=NULL)
-//    *((byte*)d) = base64tobyte(*d, strlen(*d), NULL);
+  if (*d!=NULL)
+    *((byte*)d) = base64tobyte(*d, strlen(*d), NULL);
  
 }
 

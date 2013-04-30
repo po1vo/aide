@@ -36,6 +36,7 @@
 #include "symboltable.h"
 #include "util.h"
 #include "base64.h"
+#include "base64v2.h"
 /*for locale support*/
 #include "locale-aide.h"
 /*for locale support*/
@@ -179,16 +180,16 @@ int commandconf(const char mode,const char* line)
   return RETOK;
 }
 
+/* FIXME Add support for gzipped config. :) */
 int conf_input_wrapper(char* buf, int max_size, FILE* in)
 {
   int retval=0;
+#ifdef WITH_MHASH
   int c=0;
   char* tmp=NULL;
   void* key=NULL;
   int keylen=0;
 
-  /* FIXME Add support for gzipped config. :) */
-#ifdef WITH_MHASH
   /* Read a character at a time until we are doing md */
   if(conf->do_configmd){
     retval=fread(buf,1,max_size,in);
@@ -951,7 +952,7 @@ void* get_conf_key(void) {
 }
 
 size_t get_conf_key_len(void) {
-  size_t len=0;
+  size_t *len = 0;
   char* m=(char*)malloc(strlen(aide_key_1)+
 			strlen(aide_key_2)+
 			strlen(aide_key_3)+
@@ -974,11 +975,11 @@ size_t get_conf_key_len(void) {
   strcat(m,aide_key_8);
   strcat(m,aide_key_9);
   
-  len=length_base64(m,strlen(m));
+  base64_encode(m,strlen(m),len);
 
   memset(m,0,strlen(m));
   free(m);
-  return len;
+  return *len;
 }
 
 void* get_db_key(void) {

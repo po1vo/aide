@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdlib.h>
+#include "base64v2.h"
 
 
 static char encoding_table[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
@@ -14,7 +15,7 @@ static char *decoding_table = NULL;
 static int mod_table[] = {0, 2, 1};
 
 
-char *base64_encode(const unsigned char *data,
+char *base64_encode(const char *data,
                     size_t input_length,
                     size_t *output_length) {
 
