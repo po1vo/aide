@@ -817,7 +817,7 @@ void free_db_line(db_line* dl)
     return;
   }
   
-#define checked_free(x) do { free(x); x=NULL; } while (0)
+#define checked_free(x) do { x=NULL; } while (0)
 
   checked_free(dl->md5);
   checked_free(dl->sha1);

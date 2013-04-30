@@ -677,7 +677,7 @@ seltree* gen_tree(list* prxlist,list* nrxlist,list* erxlist)
  */
 void strip_dbline(db_line* line)
 {
-#define checked_free(x) do { free(x); x=NULL; } while (0)
+#define checked_free(x) do { x=NULL; } while (0)
 
     DB_ATTR_TYPE attr = line->attr;
 
@@ -715,16 +715,16 @@ void strip_dbline(db_line* line)
   }
 
   if(!(attr&DB_MD5)){
-    line->md5=0;
+    checked_free(line->md5);
   }
   if(!(attr&DB_SHA1)){
-    line->sha1=0;
+    checked_free(line->sha1);
   }
   if(!(attr&DB_RMD160)){
-    line->rmd160=0;
+    checked_free(line->rmd160);
   }
   if(!(attr&DB_TIGER)){
-    line->tiger=0;
+    checked_free(line->tiger);
   }
 #ifdef WITH_MHASH
   if(!(attr&DB_HAVAL)){
@@ -839,10 +839,10 @@ void add_file_to_tree(seltree* tree,db_line* file,int db,int status,
       /* FIXME this messes up the tree on SunOS. Don't know why. Fix
 	 needed badly otherwise we leak memory like hell. */
 
-   //   free_db_line(node->old_data);
-   //   free(node->old_data);
-   //   free_db_line(node->new_data);
-   //   free(node->new_data);
+      free_db_line(node->old_data);
+      free(node->old_data);
+      free_db_line(node->new_data);
+      free(node->new_data);
       
       node->old_data=NULL;
       node->new_data=NULL;      

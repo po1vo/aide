@@ -36,7 +36,7 @@
 #include <assert.h>
 #include "types.h"
 
-#define B64_BUF 16384
+#define B64_BUF (16384*1000)
 #define FAIL -1
 #define SKIP -2
 
