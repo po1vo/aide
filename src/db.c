@@ -260,7 +260,7 @@ db_line* db_readline(int db){
 
 #ifdef WITH_PSQL
   case url_sql: {
-    error(255,"db_sql readline...");
+    error(255,"db_sql readline...\n");
     s=db_readline_sql(db, conf);
     
     break;
@@ -443,6 +443,7 @@ db_line* db_char2line(char** ss,int db){
 			       strlen(ss[(*db_order)[i]]), NULL);
       break;
     }
+#ifdef WITH_MHASH
     case db_crc32 : {
       line->crc32=base64tobyte(ss[(*db_order)[i]],
 			       strlen(ss[(*db_order)[i]]), NULL);
@@ -453,7 +454,6 @@ db_line* db_char2line(char** ss,int db){
 			       strlen(ss[(*db_order)[i]]), NULL);
       break;
     }
-#ifdef WITH_MHASH
     case db_gost : {
       line->gost=base64tobyte(ss[(*db_order)[i]],
 			       strlen(ss[(*db_order)[i]]), NULL);

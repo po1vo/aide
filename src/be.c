@@ -93,7 +93,7 @@ static int be_sql_readinit(psql_data* ret) {
   ret->maxread=PQntuples(ret->res);
   /* And now we know how many fields we have.. */
   
-  error(0,"%i tuples\n",ret->maxread);
+  error(10,"%i tuples\n",ret->maxread);
   
   return RETOK;
   

@@ -70,7 +70,7 @@ static int has_str_changed(char* old,char* new) {
 }
 
 static int has_md_changed(byte* old,byte* new,int len) {
-    error(255,"Debug, has_md_changed %p %p\n",old,new);
+    error(255,"D: has_md_changed %p %p\n",old,new);
     return (((old!=NULL && new!=NULL) &&
                 (bytecmp(old,new,len)!=0)) ||
             ((old!=NULL && new==NULL) ||
@@ -242,7 +242,7 @@ static DB_ATTR_TYPE get_changed_attributes(db_line* l1,db_line* l2) {
 #ifdef WITH_E2FSATTRS
     easy_compare(DB_E2FSATTRS,e2fsattrs);
 #endif
-    error(255,"Debug, changed attributes for entry %s [%llx %llx]: %llx\n", l1->filename,l1->attr,l2->attr,ret);
+    error(255,"D: Changed attributes for entry %s [%llx %llx]: %llx\n", l1->filename,l1->attr,l2->attr,ret);
     return ret;
 }
 
@@ -715,24 +715,24 @@ void strip_dbline(db_line* line)
   }
 
   if(!(attr&DB_MD5)){
-    checked_free(line->md5);
+    line->md5=0;
   }
   if(!(attr&DB_SHA1)){
-    checked_free(line->sha1);
+    line->sha1=0;
   }
   if(!(attr&DB_RMD160)){
-    checked_free(line->rmd160);
+    line->rmd160=0;
   }
   if(!(attr&DB_TIGER)){
-    checked_free(line->tiger);
+    line->tiger=0;
   }
+#ifdef WITH_MHASH
   if(!(attr&DB_HAVAL)){
     checked_free(line->haval);
   }
   if(!(attr&DB_CRC32)){
     checked_free(line->crc32);
   }
-#ifdef WITH_MHASH
   if(!(attr&DB_CRC32B)){
     checked_free(line->crc32b);
   }
@@ -742,13 +742,13 @@ void strip_dbline(db_line* line)
   if(!(attr&DB_WHIRLPOOL)){
     checked_free(line->whirlpool);
   }
-#endif
   if(!(attr&DB_SHA256)){
     checked_free(line->sha256);
   }
   if(!(attr&DB_SHA512)){
     checked_free(line->sha512);
   }
+#endif
 #ifdef WITH_ACL
   if(!(attr&DB_ACL)){
     if (line->acl)
@@ -839,10 +839,10 @@ void add_file_to_tree(seltree* tree,db_line* file,int db,int status,
       /* FIXME this messes up the tree on SunOS. Don't know why. Fix
 	 needed badly otherwise we leak memory like hell. */
 
-      free_db_line(node->old_data);
-      free(node->old_data);
-      free_db_line(node->new_data);
-      free(node->new_data);
+   //   free_db_line(node->old_data);
+   //   free(node->old_data);
+   //   free_db_line(node->new_data);
+   //   free(node->new_data);
       
       node->old_data=NULL;
       node->new_data=NULL;      

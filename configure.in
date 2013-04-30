@@ -2,7 +2,7 @@ m4_include([version.m4])
 
 dnl Initialize autoconf/automake
 AC_INIT(aide, AIDE_VERSION)
-AC_CONFIG_MACRO_DIR([m4])
+dnl AC_CONFIG_MACRO_DIR([m4])
 AC_CANONICAL_TARGET
 AM_INIT_AUTOMAKE
 
@@ -10,7 +10,7 @@ AC_DEFINE_UNQUOTED(AIDEVERSION, "AIDE_VERSION")
 AH_TEMPLATE([AIDEVERSION], [package version])
 
 dnl The name of the configure h-file.
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS([config.h])
 
 dnl Checks for programs.
 AC_PROG_CC
