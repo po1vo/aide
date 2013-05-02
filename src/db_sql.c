@@ -501,7 +501,7 @@ char* db_get_sql(db_line* line,db_config* dbconf){
       break;
     }
     case db_perm : {
-      sql_writeoct(line->perm,s,i);
+      sql_writeint(line->perm,s,i);
       break;
     }
 #ifdef WITH_MHASH
