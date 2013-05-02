@@ -1093,7 +1093,6 @@ void populate_tree(seltree* tree)
 	} else {
           free_db_line(new);
           free(new);
-          new=NULL;
 	}
       }
     } while (new);
@@ -1127,7 +1126,6 @@ void populate_tree(seltree* tree)
                 }else{
                     free_db_line(old);
                     free(old);
-                    old=NULL;
                     if(!initdbwarningprinted){
                         error(3,_("WARNING: Old db contains an entry that shouldn\'t be there. Aide was probably run with different aide.conf.\n"));
                         initdbwarningprinted=1;
