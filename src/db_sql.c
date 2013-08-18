@@ -97,7 +97,6 @@ int db_writespec_sql(db_config* dbconf){
 
   if (table_exists == 0) {
     /* we need to create the table */
-    
     s = strcat(s, "CREATE TABLE ");
 
     s = strcat(s, ((psql_data*)dbconf->db_out)->table);
@@ -112,17 +111,21 @@ int db_writespec_sql(db_config* dbconf){
       s = strcat(s, db_sql_types[dbconf->db_out_order[i]]);
     }
     s = strcat(s,");");
-
-    error(255,"SQL:%s\n",s);
-    
-    res = PQexec(((psql_data*)dbconf->db_out)->conn,s);
-
-    if (_db_check_result(((psql_data*)dbconf->db_out)->conn, res, s) == 0) {
-      ret = RETFAIL;
-    }
-  
-    PQclear(res);  
+  } else {
+    s = strcat(s, "DROP TABLE ");
+    s = strcat(s, ((psql_data*)dbconf->db_out)->table);
+    s = strcat(s,";");
   }
+
+  error(255,"SQL:%s\n",s);
+    
+  res = PQexec(((psql_data*)dbconf->db_out)->conn,s);
+
+  if (_db_check_result(((psql_data*)dbconf->db_out)->conn, res, s) == 0) {
+    ret = RETFAIL;
+  }
+
+  PQclear(res);
 
   free(s); /* Just say no to memoryleaks. */
   
