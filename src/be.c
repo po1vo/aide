@@ -1,6 +1,6 @@
 /* aide, Advanced Intrusion Detection Environment
  *
- * Copyright (C) 1999-2003,2005,2006,2010,2011 Rami Lehti, Pablo
+ * Copyright (C) 1999-2003,2005,2006,2010,2011,2013 Rami Lehti, Pablo
  * Virolainen, Richard van den Berg, Hannes von Haugwitz
  * $Header$
  *
@@ -29,7 +29,10 @@
 #include "db_config.h"
 #include "db_file.h"
 #include "report.h"
+#include "util.h"
+#ifdef WITH_CURL
 #include "fopen.h"
+#endif
 #include "be.h"
 
 #ifdef WITH_PSQL
@@ -130,6 +133,7 @@ FILE* be_init(int inout,url_t* u,int iszipped)
 
   switch (u->type) {
   case url_file : {
+    u->value = expand_tilde(u->value);
     error(200,_("Opening file \"%s\" for %s\n"),u->value,inout?"r":"w+");
 #if HAVE_FCNTL && HAVE_FTRUNCATE
     fd=open(u->value,inout?O_RDONLY:O_CREAT|O_RDWR,0666);

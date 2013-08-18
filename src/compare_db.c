@@ -1,6 +1,6 @@
 /* aide, Advanced Intrusion Detection Environment
  *
- * Copyright (C) 1999-2007,2010,2011 Rami Lehti, Pablo Virolainen,
+ * Copyright (C) 1999-2007,2010-2013 Rami Lehti, Pablo Virolainen,
  * Richard van den Berg, Mike Markley, Hannes von Haugwitz
  * $Id$
  *
@@ -59,7 +59,7 @@ const int time_string_len = 26;
 
 long ntotal, nadd, nrem, nchg = 0;
 
-const char* report_top_format = "\n---------------------------------------------------\n%s:\n---------------------------------------------------\n\n";
+const char* report_top_format = "\n\n---------------------------------------------------\n%s:\n---------------------------------------------------\n";
 
 DB_ATTR_TYPE ignored_attrs, forced_attrs;
 
@@ -302,14 +302,15 @@ static char* get_file_type_string(mode_t mode) {
 #ifdef S_IFDOOR
         case S_IFDOOR: return _("Door");
 #endif
+        case 0: return NULL;
         default: return _("Unknown file type");
     }
 }
 
 static char* byte_to_base16(byte* src, size_t ssize) {
     char* str = malloc((2*ssize+1) * sizeof (char));
-    int i;
-    for(i=0; i<ssize; ++i) {
+    size_t i;
+    for(i=0; i < ssize; ++i) {
         snprintf(&str[2*i], 3, "%02x", src[i]);
     }
     return str;
@@ -344,9 +345,8 @@ snprintf(*values[0], l, "%s",s);
 
     int l;
     if (line==NULL || !(line->attr&attr)) {
-        *values = malloc(1 * sizeof (char*));
-        easy_string("")
-        return 1;
+        *values = NULL;
+        return 0;
 #ifdef WITH_ACL
     } else if (DB_ACL&attr) {
         return acl2array(line->acl, &*values);
@@ -442,7 +442,7 @@ static void print_line(seltree* node) {
             }
         }
         summary[length]='\0';
-        error(2,"%s: %s\n", summary, (node->checked&NODE_REMOVED?node->old_data:node->new_data)->filename);
+        error(2,"\n%s: %s", summary, (node->checked&NODE_REMOVED?node->old_data:node->new_data)->filename);
         free(summary); summary=NULL;
     } else {
         if (node->checked&NODE_ADDED) {
@@ -462,7 +462,12 @@ static void print_dbline_attributes(db_line* oline, db_line* nline, DB_ATTR_TYPE
     int length = sizeof(details_attributes)/sizeof(DB_ATTR_TYPE);
     int p = (width_details-(width_details%2?13:14))/2;
     DB_ATTR_TYPE attrs;
-    error(2,"\n%s: %s\n",get_file_type_string((nline==NULL?oline:nline)->perm),(nline==NULL?oline:nline)->filename);
+    error(2,"\n");
+    char *file_type = get_file_type_string((nline==NULL?oline:nline)->perm);
+    if (file_type) {
+        error(2,"%s: ", file_type);
+    }
+    error(2,"%s\n", (nline==NULL?oline:nline)->filename);
     attrs=(~(ignored_attrs))&(report_attrs|changed_attrs)&((oline==NULL?0:oline->attr)|(nline==NULL?0:nline->attr));
     for (j=0; j < length; ++j) {
         if (details_attributes[j]&attrs) {
@@ -475,12 +480,12 @@ static void print_dbline_attributes(db_line* oline, db_line* nline, DB_ATTR_TYPE
                 k = 0;
                 while (olen-p*k >= 0 || nlen-p*k >= 0) {
                     c = k*(p-1);
-                    if (oline==NULL || !(oline->attr&details_attributes[j]) ) {
-                        error(2," %s%-9s%c %-*c  %.*s\n", width_details%2?"":" ", i+k?"":details_string[j], i+k?' ':':', p, ' ', p-1, nlen-p*k>0?&nvalue[i][c]:"");
-                    } else if (nline==NULL || !(nline->attr&details_attributes[j])) {
-                        error(2," %s%-9s%c %.*s\n", width_details%2?"":" ", i+k?"":details_string[j], i+k?' ':':', p-1, olen-p*k>0?&ovalue[i][c]:"");
+                    if (!onumber) {
+                        error(2," %s%-9s%c %-*c  %.*s\n", width_details%2?"":" ", i+k?"":details_string[j], i+k?' ':':', p, ' ', p-1, nlen-c>0?&nvalue[i][c]:"");
+                    } else if (!nnumber) {
+                        error(2," %s%-9s%c %.*s\n", width_details%2?"":" ", i+k?"":details_string[j], i+k?' ':':', p-1, olen-c>0?&ovalue[i][c]:"");
                     } else {
-                        error(2," %s%-9s%c %-*.*s| %.*s\n", width_details%2?"":" ", i+k?"":details_string[j], i+k?' ':':', p, p-1, olen-p*k>0?&ovalue[i][c]:"", p-1, nlen-p*k>0?&nvalue[i][c]:"");
+                        error(2," %s%-9s%c %-*.*s| %.*s\n", width_details%2?"":" ", i+k?"":details_string[j], i+k?' ':':', p, p-1, olen-c>0?&ovalue[i][c]:"", p-1, nlen-c>0?&nvalue[i][c]:"");
                     }
                     k++;
                 }
@@ -558,7 +563,7 @@ static void print_report_details(seltree* node) {
     if (conf->verbose_level>=5) {
         if (node->checked&NODE_CHANGED) {
             print_dbline_attributes(node->old_data, node->new_data, node->changed_attrs, (conf->verbose_level>=6?(((node->old_data)->attr)^((node->new_data)->attr)):0)|forced_attrs);
-        } else if ((conf->verbose_level>=6)) {
+        } else if ((conf->verbose_level>=7)) {
             if (node->checked&NODE_ADDED) { print_attributes_added_node(node->new_data); }
             if (node->checked&NODE_REMOVED) { print_attributes_removed_node(node->old_data); }
         }
@@ -613,9 +618,21 @@ static void print_report_header() {
 
     if(conf->action&(DO_COMPARE|DO_DIFF) && (nadd||nrem||nchg)) {
         error(0,_("\nSummary:\n  Total number of entries:\t%li\n  Added entries:\t\t%li\n"
-                    "  Removed entries:\t\t%li\n  Changed entries:\t\t%li\n\n"), ntotal, nadd, nrem, nchg);
+                    "  Removed entries:\t\t%li\n  Changed entries:\t\t%li"), ntotal, nadd, nrem, nchg);
     } else {
-        error(0,_("\nNumber of entries:\t%li\n"), ntotal);
+        error(0,_("\nNumber of entries:\t%li"), ntotal);
+    }
+}
+
+static void print_report_databases() {
+    if (conf->verbose_level>=2 && (conf->line_db_in || conf->line_db_out)) {
+        error(2,(char*)report_top_format,_("The attributes of the (uncompressed) database(s)"));
+        if (conf->line_db_in) {
+            print_attributes_removed_node(conf->line_db_in);
+        }
+        if (conf->line_db_out) {
+            print_attributes_removed_node(conf->line_db_out);
+        }
     }
 }
 
@@ -625,7 +642,7 @@ static void print_report_footer()
   int run_time = (int) difftime(conf->end_time, conf->start_time);
 
   strftime(time, time_string_len, time_format, localtime(&(conf->end_time)));
-  error(2,_("\nEnd timestamp: %s (run time: %dm %ds)\n"), time, run_time/60, run_time%60);
+  error(2,_("\n\nEnd timestamp: %s (run time: %dm %ds)\n"), time, run_time/60, run_time%60);
   free(time); time=NULL;
 }
 
@@ -663,7 +680,7 @@ int gen_report(seltree* node) {
     send_audit_report();
 #endif
     print_report_header();
-    if(conf->action&(DO_COMPARE|DO_DIFF) || (conf->action&DO_INIT && conf->detailed_init_report) ) {
+    if(conf->action&(DO_COMPARE|DO_DIFF) || (conf->action&DO_INIT && conf->report_detailed_init) ) {
     if (conf->grouped) {
         if (nadd) {
             error(2,(char*)report_top_format,_("Added entries"));
@@ -688,14 +705,15 @@ int gen_report(seltree* node) {
         print_report_list(node, NODE_ADDED|NODE_REMOVED|NODE_CHANGED);
     }
     if (nadd || nrem || nchg) {
-        error(nchg?5:6,(char*)report_top_format,_("Detailed information about changes"));
+        error(nchg?5:7,(char*)report_top_format,_("Detailed information about changes"));
         print_report_details(node);
     }
     }
+    print_report_databases();
     conf->end_time=time(&(conf->end_time));
     print_report_footer();
 
-    return (nadd!=0)*1+(nrem!=0)*2+(nchg!=0)*4;
+    return conf->action&(DO_COMPARE|DO_DIFF) ? (nadd!=0)*1+(nrem!=0)*2+(nchg!=0)*4 : 0;
 }
 
 const char* aide_key_9=CONFHMACKEY_09;

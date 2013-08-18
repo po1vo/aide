@@ -1,6 +1,6 @@
 /* aide, Advanced Intrusion Detection Environment
  *
- * Copyright (C) 1999-2006,2010,2011 Rami Lehti, Pablo Virolainen,
+ * Copyright (C) 1999-2006,2010,2011,2013 Rami Lehti, Pablo Virolainen,
  * Richard van den Berg, Hannes von Haugwitz
  * $Header$
  *
@@ -34,12 +34,15 @@
 #include "db_config.h"
 #include "gen_list.h"
 #include "symboltable.h"
+#include "md.h"
 #include "util.h"
 #include "base64.h"
 /*for locale support*/
 #include "locale-aide.h"
 /*for locale support*/
+#ifdef WITH_CURL
 #include "fopen.h"
+#endif
 
 #define BUFSIZE 4096
 #define ZBUFSIZE 16384
@@ -96,27 +99,8 @@ int commandconf(const char mode,const char* line)
   case 'D': {
     /* Let's do it */
     int rv=-1;
-    char* new_config=NULL;
-    char* homedir=NULL;
 
-    /* support for ~ in the config file string 
-       ~ must be the first character and it will be
-       replaced with HOME-environment variable
-     */
-    if(config[0]=='~'){
-      if((homedir=getenv("HOME"))){
-	new_config=(char*)malloc(sizeof(char)*
-				 (strlen(config)+strlen(homedir)+1));
-	memcpy(new_config,homedir,strlen(homedir));
-	memcpy(new_config+strlen(homedir),
-	       config+sizeof(char),strlen(config+sizeof(char)));
-	l=(strlen(config)+strlen(homedir));
-	new_config[l]='\0';
-	free(config);
-	config=new_config;
-	/* Don't free(homedir); because it is not safe on some platforms */
-      }
-    }
+    config = expand_tilde(config);
     if (config!=NULL && strcmp(config,"-")==0) {
       error(255,_("Config from stdin\n"));
       rv=0;
@@ -256,6 +240,7 @@ int db_input_wrapper(char* buf, int max_size, int db)
 #ifdef WITH_ZLIB
   gzFile* db_gzp=NULL;
 #endif
+  struct md_container *mdc;
   switch(db) {
   case DB_OLD: {
 #ifdef WITH_CURL
@@ -299,6 +284,9 @@ int db_input_wrapper(char* buf, int max_size, int db)
   case url_https:
   case url_ftp: {
     retval=url_fread(buf,1,max_size,(URL_FILE *)*db_filep);
+    if ((mdc = (db == DB_OLD ? conf->mdc_in : conf->mdc_out))) {
+        update_md(mdc, buf, retval);
+    }
     break;
   } 
   default:
@@ -370,6 +358,10 @@ int db_input_wrapper(char* buf, int max_size, int db)
   retval=fread(buf,1,max_size,*db_filep);
 #endif /* WITH_MHASH */ 
 #endif /* WITH_ZLIB */
+
+  if ((mdc = (db == DB_OLD ? conf->mdc_in : conf->mdc_out))) {
+      update_md(mdc, buf, retval);
+  }
 
 #ifdef WITH_MHASH    
   if(*domd){

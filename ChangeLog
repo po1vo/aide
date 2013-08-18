@@ -1,3 +1,52 @@
+2013-05-20 Hannes von Haugwitz <hannes@vonhaugwitz.com>
+	* Print checksums of databases in verbose level 2 or higher (closes
+	  feature request 1502032)
+	* Added new 'database_attrs' option
+	* configure.in: fixed compilation with selinux
+	* src/conf_lex.l, src/db_lex.l: fixed definition of YYDEBUG
+
+2013-05-18	Hannes von Haugwitz <hannes@vonhaugwitz.com>
+	* configure.in: removed check for 'libcrypt'
+	* Renamed 'detailed_init_report' option to 'report_detailed_init'
+
+2013-05-17	Hannes von Haugwitz <hannes@vonhaugwitz.com>
+	* configure.in:
+	  - fixed "suspicious cache-id" warnings
+	  - removed 'AC_CONFIG_MACRO_DIR' macro
+	* src/Makefile.am:
+	  - replaced INCLUDES with AM_CPPFLAGS
+
+2013-05-16	Hannes von Haugwitz <hannes@vonhaugwitz.com>
+	* Handle tilde (~) in database paths and report urls
+	* src/compare_db.c: adjusted report layout
+
+2013-05-14	Hannes von Haugwitz <hannes@vonhaugwitz.com>
+	* src/db.c: fixed segfault when dbconf->db_out is NULL
+	* Replaced fopen.c with the version from curl-7.30.0
+
+2013-05-08	Hannes von Haugwitz <hannes@vonhaugwitz.com>
+	* src/compare_db.c:
+	  - fixed output of checksums
+	  - use size_t as the type of for loop variable
+
+2013-05-06	Hannes von Haugwitz <hannes@vonhaugwitz.com>
+	* src/compare_db.c:
+	  - fixed return value of database initialization
+	  - minor code cleanup
+	* src/db_file.c, src/do_md.c:
+	  - fixed use of unportable %m format
+	* doc/aide.1.in:
+	  - fixed format in NOTES section
+	  - documented return value of '--compare' and '--update' command
+
+2013-05-04	Hannes von Haugwitz <hannes@vonhaugwitz.com>
+	* src/compare_db.c:
+	  - changed minimum verbose level for printing the details
+	    about added and removed entries to 7
+	* README:
+	  - updated "Source Code Verification" section
+	* Released version 0.16a2
+
 2012-10-10	Hannes von Haugwitz <hannes@vonhaugwitz.com>
 	* Added new default group X
 	* src/gen_list.c: fixed stripping of removed attributes

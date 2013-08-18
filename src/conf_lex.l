@@ -12,10 +12,10 @@ EX      [" "\t]*
 
 %{
 
-#define YYDEBUG
+#define YYDEBUG 1
 
 /*
- * Copyright (C) 1999-2002,2004-2006,2010-2012 Rami Lehti, Pablo
+ * Copyright (C) 1999-2002,2004-2006,2010-2013 Rami Lehti, Pablo
  * Virolainen, Richard van den Berg, Hannes von Haugwitz
  * $Header$
  * This program is free software; you can redistribute it and/or
@@ -307,6 +307,12 @@ int var_in_conflval=0;
   return (TDATABASE_NEW);
 }
 
+^[\t\ ]*"database_attrs"{E} {
+  error(230,"%li:database_attrs =\n",conf_lineno);
+  BEGIN EXPR;
+  return (TDATABASE_ATTRS);
+}
+
 ^[\t\ ]*"warn_dead_symlinks"{E} {
   error(230,"%li:warn_dead_symlinks =\n",conf_lineno);
   BEGIN CONFVALHUNT;
@@ -343,10 +349,10 @@ int var_in_conflval=0;
   return (TREPORT_URL);  
 }
 
-^[\t\ ]*"detailed_init_report"{E} {
-  error(230,"%li:detailed_init_report =\n",conf_lineno);
+^[\t\ ]*"report_detailed_init"{E} {
+  error(230,"%li:report_detailed_init =\n",conf_lineno);
   BEGIN CONFVALHUNT;
-  return (TDETAILEDINITREPORT);
+  return (TREPORTDETAILEDINIT);
 }
 
 ^[\t\ ]*"report_base16"{E} {

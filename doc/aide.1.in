@@ -54,7 +54,9 @@ Prints out the standard help message.
 .PP
 .SH DIAGNOSTICS
 Normally, the exit status is 0 if no errors occurred. Except when the
-.B --check
+.BR --check,
+.BR --compare " or"
+.B --update
 command was requested, in which case the exit status is defined as:
 .IP "1 * (new files detected?)     +"
 .IP "2 * (removed files detected?) +"
@@ -77,7 +79,7 @@ The checksums in the database and in the output are by default base64
 encoded (see also report_base16 option).
 To decode them you can use the following shell command:
 
-echo <encoded_checksum> | base64 -d | hexdump -v -e '32/1 "%02x" "\\n"'
+echo <encoded_checksum> | base64 \-d | hexdump \-v \-e '32/1 "%02x" "\\n"'
 
 .PP
 .SH FILES
