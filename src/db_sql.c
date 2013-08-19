@@ -84,7 +84,7 @@ int db_writespec_sql(db_config* dbconf){
   /* We'll drop table and then recreate it */
 
   /* drop the table */
-  sprintf(s, "DROP TABLE %s", ((psql_data*)dbconf->db_out)->table);
+  sprintf(s, "DROP TABLE %s;", ((psql_data*)dbconf->db_out)->table);
   res = PQexec(((psql_data*)dbconf->db_out)->conn, s);
   if ( _db_check_result(((psql_data*)dbconf->db_out)->conn, res, s) == 0 )
     ret = RETFAIL;
