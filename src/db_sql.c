@@ -81,49 +81,38 @@ int db_writespec_sql(db_config* dbconf){
 					    390 + length of table
 					    name should be enough.
 					 */
-  /* We have to ensure that the database table not exist */
+  /* We'll drop table and then recreate it */
 
-  /* check if the table exists already */
-  sprintf(s, "SELECT * FROM pg_class WHERE relname = '%s'", 
-             ((psql_data*)dbconf->db_out)->table);
+  /* drop the table */
+  sprintf(s, "DROP TABLE '%s';", ((psql_data*)dbconf->db_out)->table);
   res = PQexec(((psql_data*)dbconf->db_out)->conn, s);
-  if ( _db_check_result(((psql_data*)dbconf->db_out)->conn, res, s) == 0 ) {
+  if ( _db_check_result(((psql_data*)dbconf->db_out)->conn, res, s) == 0 )
     ret = RETFAIL;
-  }
-  table_exists = PQntuples(res) == 1 ? 1 : 0;
+
   PQclear(res);
 
+  /* Now we need to create the table */
   *s = '\0';  /* reset query string */
-
-  if (table_exists == 0) {
-    /* we need to create the table */
-    s = strcat(s, "CREATE TABLE ");
-
-    s = strcat(s, ((psql_data*)dbconf->db_out)->table);
-    s = strcat(s, "(");
+  s = strcat(s, "CREATE TABLE ");
+  s = strcat(s, ((psql_data*)dbconf->db_out)->table);
+  s = strcat(s, "(");
   
-    for (i=0;i<dbconf->db_out_size;i++) {
-      if (i!=0) {
-        s = strcat(s, ",");
-      }
-      s = strcat(s, db_names[dbconf->db_out_order[i]]);
-      s = strcat(s, " ");
-      s = strcat(s, db_sql_types[dbconf->db_out_order[i]]);
-    }
-    s = strcat(s,");");
-  } else {
-    s = strcat(s, "DROP TABLE ");
-    s = strcat(s, ((psql_data*)dbconf->db_out)->table);
-    s = strcat(s,";");
+  for (i=0;i<dbconf->db_out_size;i++) {
+    if (i!=0)
+      s = strcat(s, ",");
+ 
+    s = strcat(s, db_names[dbconf->db_out_order[i]]);
+    s = strcat(s, " ");
+    s = strcat(s, db_sql_types[dbconf->db_out_order[i]]);
   }
+  s = strcat(s,");");
 
   error(255,"SQL:%s\n",s);
     
   res = PQexec(((psql_data*)dbconf->db_out)->conn,s);
 
-  if (_db_check_result(((psql_data*)dbconf->db_out)->conn, res, s) == 0) {
+  if (_db_check_result(((psql_data*)dbconf->db_out)->conn, res, s) == 0)
     ret = RETFAIL;
-  }
 
   PQclear(res);
 
