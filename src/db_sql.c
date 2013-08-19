@@ -81,7 +81,7 @@ int db_writespec_sql(db_config* dbconf){
 					    390 + length of table
 					    name should be enough.
 					 */
-  /* We'll drop table and then recreate it if it exists */
+  /* We'll truncate the table if exists, create it otherwise */
 
   /* check if the table exists already */
   sprintf(s, "SELECT * FROM pg_class WHERE relname = '%s'", 
@@ -96,31 +96,25 @@ int db_writespec_sql(db_config* dbconf){
   *s = '\0';  /* reset query string */
 
   if (table_exists == 1) {
-    /* drop the table */
-    sprintf(s, "DROP TABLE %s;", ((psql_data*)dbconf->db_out)->table);
-    res = PQexec(((psql_data*)dbconf->db_out)->conn, s);
-    if ( _db_check_result(((psql_data*)dbconf->db_out)->conn, res, s) == 0 )
-      ret = RETFAIL;
-
-    PQclear(res);
-
-    *s = '\0';  /* reset query string */
-  }
-
-  /* Now we need to create the table */
-  s = strcat(s, "CREATE TABLE ");
-  s = strcat(s, ((psql_data*)dbconf->db_out)->table);
-  s = strcat(s, "(");
+    /* truncate the table */
+    sprintf(s, "TRUNCATE TABLE %s;", ((psql_data*)dbconf->db_out)->table);
+  } else {
+    /* create the table */
+    s = strcat(s, "CREATE TABLE ");
+    s = strcat(s, ((psql_data*)dbconf->db_out)->table);
+    s = strcat(s, "(");
   
-  for (i=0;i<dbconf->db_out_size;i++) {
-    if (i!=0)
-      s = strcat(s, ",");
+    for (i=0;i<dbconf->db_out_size;i++) {
+      if (i!=0)
+        s = strcat(s, ",");
  
-    s = strcat(s, db_names[dbconf->db_out_order[i]]);
-    s = strcat(s, " ");
-    s = strcat(s, db_sql_types[dbconf->db_out_order[i]]);
+      s = strcat(s, db_names[dbconf->db_out_order[i]]);
+      s = strcat(s, " ");
+      s = strcat(s, db_sql_types[dbconf->db_out_order[i]]);
+    }
+
+    s = strcat(s,");");
   }
-  s = strcat(s,");");
 
   error(255,"SQL:%s\n",s);
     
